@@ -43,7 +43,7 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>.\build\FLASH\</OutputDirectory>
+          <OutputDirectory>.\build\</OutputDirectory>
           <OutputName>HelloWorld</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
@@ -80,7 +80,7 @@
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
           </AfterMake>
-          <SelectedForBatchBuild>0</SelectedForBatchBuild>
+          <SelectedForBatchBuild>1</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
         </TargetCommonOption>
         <CommonProperty>
@@ -139,7 +139,7 @@
             <RestoreTracepoints>1</RestoreTracepoints>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>1</TargetSelection>
+          <TargetSelection>0</TargetSelection>
           <SimDlls>
             <CpuDll></CpuDll>
             <CpuDllArguments></CpuDllArguments>
@@ -411,6 +411,16 @@
               <FileType>1</FileType>
               <FilePath>.\src\uart_polling.c</FilePath>
             </File>
+            <File>
+              <FileName>Retarget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Startup\Retarget.c</FilePath>
+            </File>
+            <File>
+              <FileName>RTX_Conf_CM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Startup\RTX_Conf_CM.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -420,6 +430,16 @@
               <FileName>helloworld.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\helloworld.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>RTX Lib</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_CM3.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\RTX_CM3\CM3_LE\RTX_CM3.lib</FilePath>
             </File>
           </Files>
         </Group>
@@ -499,7 +519,7 @@
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
           </AfterMake>
-          <SelectedForBatchBuild>0</SelectedForBatchBuild>
+          <SelectedForBatchBuild>1</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
         </TargetCommonOption>
         <CommonProperty>
@@ -830,6 +850,16 @@
               <FileType>1</FileType>
               <FilePath>.\src\uart_polling.c</FilePath>
             </File>
+            <File>
+              <FileName>Retarget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Startup\Retarget.c</FilePath>
+            </File>
+            <File>
+              <FileName>RTX_Conf_CM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Startup\RTX_Conf_CM.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -839,6 +869,16 @@
               <FileName>helloworld.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\helloworld.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>RTX Lib</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_CM3.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\RTX_CM3\CM3_LE\RTX_CM3.lib</FilePath>
             </File>
           </Files>
         </Group>

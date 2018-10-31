@@ -1,0 +1,5 @@
+Task1: Fills the memory pool by allocating 12 boxes of 20 bytes
+Task2: Requests a box of memory to be allocated although is blocked since Task1 filled the memory pool up
+Task3: With a higher priority than Task2, requests a box of memory to be allocated although is blocked since Task1 filled the memory pool up
+Task4: Calls os_mem_free to free resources for the one of the blocked tasks first. Task3 is allocated the newly freed space since it has a higher priority than task2
+       task4 then calls os_dly_wait and then calls os_mem_free again to free resources for Task2 which had been waiting and blocked.
