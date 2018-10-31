@@ -14,7 +14,16 @@
 #include <sys/wait.h>
 #include <math.h>
 
+#include <semaphore.h> // added thism 
+
+
 double g_time[2];
+
+pthread_mutex_t mutex;
+
+sem_t empty_list;
+sem_t full_list;
+int *buffer;
 
 
 int main(int argc, char *argv[])
@@ -26,6 +35,7 @@ int main(int argc, char *argv[])
 	int i;
 	struct timeval tv;
 
+	
 	if (argc != 5) {
 		printf("Usage: %s <N> <B> <P> <C>\n", argv[0]);
 		exit(1);
@@ -35,10 +45,24 @@ int main(int argc, char *argv[])
 	maxmsg = atoi(argv[2]); /* buffer size                */
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
+	buffer = malloc(maxmsg * sizeof(int));
+	
+	int total = num_p + num_c;
+	pthread_t [num_p + num_c];
 
+	for ( int i=0; i < num_p; i++){
+
+        pthread_create(&threads[i], NULL, producer, buffer);
+	}
+	for (int j = num_p; j < total; j++)
+	{
+
+		pthread_create(&threads[j], NULL, consumer, buffer;
+	}
 
 	gettimeofday(&tv, NULL);
 	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
+
 
 
     gettimeofday(&tv, NULL);
