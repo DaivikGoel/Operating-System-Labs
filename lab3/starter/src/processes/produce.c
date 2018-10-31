@@ -40,6 +40,33 @@ int main(int argc, char *argv[])
 	gettimeofday(&tv, NULL);
 	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
+	//Create all producer processes
+	int i;
+	pid_t id;
+	int *buffer;
+	buffer = malloc( maxmsg * sizeof(int));
+
+	for(i = 0; i < num_p; i++){
+		id = fork();
+		//If it is the child process it is therefore a producer and should do producer work
+		if ( id==0){
+		
+			producerWork(i);
+		}
+
+	}
+
+	//Create all consumer processews
+	for(j = 0; j < num_c; j++){
+		id = fork();
+		//If it is the child process it is therefore a consumer and should do produconsumercer work
+		if ( id==0){
+			consumerWork(i);
+		}
+
+	}
+	
+	//Wait for processes to finish
 
     gettimeofday(&tv, NULL);
     g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
@@ -47,4 +74,19 @@ int main(int argc, char *argv[])
     printf("System execution time: %.6lf seconds\n", \
             g_time[1] - g_time[0]);
 	exit(0);
+}
+
+//Push integers onto buffer based on formaula integer = id%nump
+void producerWork (int id){
+	int i = 0;
+	while(1){
+
+	buffer.push((i * num_p) + id) % num_p);
+
+	}
+	kill;
+}
+//Take integers off of buffer and calculate square root
+void consumerWork (pid_t id){
+
 }
