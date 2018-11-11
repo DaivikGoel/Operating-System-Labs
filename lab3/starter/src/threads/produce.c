@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 
         pthread_create(&threads[i], NULL, producer, buffer);
 	}
+	
 	for (int j = num_p; j < total; j++)
 	{
 
