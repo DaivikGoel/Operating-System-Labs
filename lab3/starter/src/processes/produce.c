@@ -36,34 +36,51 @@ int main(int argc, char *argv[])
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
 
+	mqd_t mq;
+    struct mq_attr attr;
+    char buffer[maxmsg + 1];
+
+    /* initialize the queue attributes */
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = maxmsg;
+    attr.mq_msgsize = maxmsg;
+    attr.mq_curmsgs = 0;
+
+    /* create the message queue */
+    mq = mq_open(QUEUE_NAME, O_CREAT | O_RDONLY, 0644, &attr);
+    CHECK((mqd_t)-1 != mq);
 
 	gettimeofday(&tv, NULL);
 	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
 	//Create all producer processes
-	int i;
-	pid_t id;
-	int *buffer;
+	int id;
+	int pid;
+	int numProduced = 0;
 	buffer = malloc( maxmsg * sizeof(int));
 
-	for(i = 0; i < num_p; i++){
+	//Create all producers
+	for(pid = 0; pid < num_p; pid++){
 		id = fork();
 		//If it is the child process it is therefore a producer and should do producer work
 		if ( id==0){
-		
-			producerWork(i);
+			//Critical section
+			semWait();
+			producerWork(id, num, num_p, numProduced);
+			semSignal();
+			kill;
 		}
-
 	}
 
-	//Create all consumer processews
-	for(j = 0; j < num_c; j++){
+	int cid;
+	//Create all consumer processes
+	for(cid = 0; cid < num_c; cid++){
 		id = fork();
 		//If it is the child process it is therefore a consumer and should do produconsumercer work
 		if ( id==0){
+			//Critical section
 			consumerWork(i);
 		}
-
 	}
 	
 	//Wait for processes to finish
@@ -76,17 +93,33 @@ int main(int argc, char *argv[])
 	exit(0);
 }
 
-//Push integers onto buffer based on formaula integer = id%nump
-void producerWork (int id){
+//Push integers onto buffer based on formula integer = id%nump
+void producerWork (int p_id, int N, int P, int &numCreated){
 	int i = 0;
-	while(1){
-
-	buffer.push((i * num_p) + id) % num_p);
-
-	}
-	kill;
+	while(i < N/P){
+		if(mq_curmsgs >= maxmsg)
+			wait();
+		if(i%P ==id){
+			// buffer.push(i);
+			mq_send(mq, buffer, size_t, unsigned)
+			mq_curmsgs++;
+			i++;
+		}
+	}	
 }
 //Take integers off of buffer and calculate square root
-void consumerWork (pid_t id){
-
+void consumerWork (int c_id, int N, int &numCreated)
+	int work;
+	double root;
+	while(buffer.size > 0){
+		if(numCreated == 0)
+			//Exit
+		work = buffer.pop;
+		root = sqrt(work);
+		//Check if root is an integer
+		if(floor(root) == root){
+			printf("%d %d %d", c_id, work, root)
+		}
+	}
+	printf(id, input, output);
 }
