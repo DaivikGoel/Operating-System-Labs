@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <math.h>
-
+#include <pthread.h>
 #include <semaphore.h> // added thism 
 
 
@@ -25,7 +25,7 @@ sem_t empty_list;
 sem_t filled_list;
 int *buffer;
 int index_p;
-int read = 0;
+int numread = 0;
 
 struct arg_struct
 {
@@ -33,6 +33,7 @@ struct arg_struct
 	int maxmsg;
 	int num;
 	int num_p;
+	int num_c;
 };
 
 
@@ -41,8 +42,13 @@ int main(int argc, char *argv[])
 	
 	int i;
 	struct timeval tv;
+	int num;
+	int maxmsg;
+	int num_p;
+	int num_c;
+	int index_p;
+	int index_c;
 
-	
 	if (argc != 5) {
 		printf("Usage: %s <N> <B> <P> <C>\n", argv[0]);
 		exit(1);
@@ -68,30 +74,30 @@ int main(int argc, char *argv[])
 
 	for (int i = 0; i < num_p; i++)
 	{
-		struct arg_struct *pargs;
+		struct arg_struct pargs;
 		pargs.index = i;
 		pargs.maxmsg = maxmsg;
 		pargs.num = num;
 		pargs.num_p = num_p;
 
 
-		pthread_create(&producers[i], NULL, &producer, (void*)&pargs );
+		pthread_create(&producers[i], NULL, producer(), (void*)&pargs );
 	}
 
 	for (int j = 0; j < num_c; j++)
 	{
-		struct arg_struct *cargs;
+		struct arg_struct cargs;
 		cargs.index = j;
 		cargs.maxmsg = maxmsg;
 		cargs.num = num;
 		cargs.num_c = num_c;
 
-		pthread_create(&consumers[j], NULL, &consumer, (void*)&cargs;
+		pthread_create(&consumers[j], NULL, consumer(), (void*)&cargs);
 	}
 
 	gettimeofday(&tv, NULL);
     g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
-
+	
     printf("System execution time: %.6lf seconds\n", \
             g_time[1] - g_time[0]);
 	exit(0);
@@ -99,9 +105,9 @@ int main(int argc, char *argv[])
 
 }
 
-void *producer(void* arguments )
+void producer(void* arguments )
 {
-	struct arg_struct *args = arguments;
+	struct arg_struct args = (struct arg_struct*)(*arguments);
 
 	int i = 0;
 	while (i < args.num / args.num_p)
@@ -118,22 +124,23 @@ void *producer(void* arguments )
 	pthread_exit(NULL);
 }
 
-void *consumer(void *arguments){
+void consumer(void *arguments){
 
-	struct arg_struct *args = arguments;
+	struct arg_struct args = arguments;
 
 	int work;
 	double root;
-	while(read < args.num){
+	
+	while(numread < args.num){
 
 		sem_wait(&filled_list);
 		pthread_mutex_lock(&mutex);
 
 		work = buffer[index_c];
 		index_c = (index_c + 1 ) % args.maxmsg;
-		read++;
-		if(read == args.num){
-			sem+_(&filled_list)
+		numread++;
+		if(numread == args.num){
+			sem_post(&filled_list)
 		}
 		pthread_mutex_unlock(&mutex);
 		sem_post(&empty_list);
