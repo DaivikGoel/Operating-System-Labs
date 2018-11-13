@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 	
 	
 	buffer = malloc(maxmsg * sizeof(int));
+	pthread_mutex_init(&mutex, NULL);
 	int total = num_p + num_c;
 	pthread_t producers [num_p];
 	pthread_t consumers[num_c];
