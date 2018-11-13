@@ -22,10 +22,10 @@ double g_time[2];
 pthread_mutex_t mutex;
 
 sem_t empty_list;
-sem_t full_list;
+sem_t filled_list;
 int *buffer;
 int index_p;
-
+int read = 0;
 
 struct arg_struct
 {
@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
 	pthread_t producers [num_p];
 	pthread_t consumers[num_c];
 	index_p = 0;
+	index_c = 0;
 
 	gettimeofday(&tv, NULL);
 	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
@@ -66,20 +67,25 @@ int main(int argc, char *argv[])
 
 	for (int i = 0; i < num_p; i++)
 	{
-		struct arg_struct *args;
-		args.index = i;
-		args.maxmsg = maxmsg;
-		args.num = num;
-		args.num_p = num_p;
+		struct arg_struct *pargs;
+		pargs.index = i;
+		pargs.maxmsg = maxmsg;
+		pargs.num = num;
+		pargs.num_p = num_p;
 
 
-		pthread_create(&producers[i], NULL, &producer, (void*)&args );
+		pthread_create(&producers[i], NULL, &producer, (void*)&pargs );
 	}
 
 	for (int j = 0; j < num_c; j++)
 	{
+		struct arg_struct *cargs;
+		cargs.index = j;
+		cargs.maxmsg = maxmsg;
+		cargs.num = num;
+		cargs.num_c = num_c;
 
-		pthread_create(&consumers[j], NULL, consumer, buffer;
+		pthread_create(&consumers[j], NULL, &consumer, (void*)&cargs;
 	}
 
 	gettimeofday(&tv, NULL);
@@ -105,7 +111,40 @@ void *producer(void* arguments )
 		buffer[index_p] = i;						   
 		index_p = (index_p + 1) % args.maxmsg; 
 		pthread_mutex_unlock(&mutex);					   
-		sem_post(&full_list);								   
+		sem_post(&filled_list);								   
 	}
+	free(args);
+	pthread_exit(NULL);
+}
+
+void *consumer(void *arguments){
+
+	struct arg_struct *args = arguments;
+
+	int work;
+	double root;
+	while(read < args.num){
+
+		sem_wait(&filled_list);
+		pthread_mutex_lock(&mutex);
+
+		work = buffer[index_c];
+		index_c = (index_c + 1 ) % args.maxmsg;
+		read++;
+		if(read == args.num){
+			sem+_(&filled_list)
+		}
+		pthread_mutex_unlock(&mutex);
+		sem_post(&empty_list);
+		//Check if root is an integer
+		root = sqrt(work);
+		if (floor(root) == root)
+		{
+			printf("%d %d %d", c_id, work, root)
+		}
+	}
+	pthread_mutex_unlock(&mutex);
+	sem_post(&filled_list)
+
 	pthread_exit(NULL);
 }
