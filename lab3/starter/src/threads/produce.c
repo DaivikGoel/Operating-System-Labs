@@ -14,8 +14,7 @@
 #include <sys/wait.h>
 #include <math.h>
 #include <pthread.h>
-#include <semaphore.h> // added thism 
-
+#include <semaphore.h> // added thism
 
 double g_time[2];
 
@@ -36,10 +35,8 @@ struct arg_struct
 	int num_c;
 };
 
-
 int main(int argc, char *argv[])
 {
-	
 	int i;
 	struct timeval tv;
 	int num;
@@ -58,7 +55,6 @@ int main(int argc, char *argv[])
 	maxmsg = atoi(argv[2]); /* buffer size                */
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
-	
 	
 	buffer = malloc(maxmsg * sizeof(int));
 	pthread_mutex_init(&mutex, NULL);
@@ -101,8 +97,6 @@ int main(int argc, char *argv[])
     printf("System execution time: %.6lf seconds\n", \
             g_time[1] - g_time[0]);
 	exit(0);
-
-
 }
 
 void producer(void* arguments )

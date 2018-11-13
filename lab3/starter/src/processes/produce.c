@@ -16,7 +16,6 @@
 
 double g_time[2];
 
-
 int main(int argc, char *argv[])
 {
 	int num;
@@ -36,54 +35,55 @@ int main(int argc, char *argv[])
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
 
-	mqd_t mq;
-    struct mq_attr attr;
-    char buffer[maxmsg + 1];
-
-    /* initialize the queue attributes */
-    attr.mq_flags = 0;
-    attr.mq_maxmsg = maxmsg;
-    attr.mq_msgsize = maxmsg;
-    attr.mq_curmsgs = 0;
-
-    /* create the message queue */
-    mq = mq_open(QUEUE_NAME, O_CREAT | O_RDONLY, 0644, &attr);
-    CHECK((mqd_t)-1 != mq);
-
 	gettimeofday(&tv, NULL);
 	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
+	//Initialize and open message queue for inter-preocess communication
+	mqd_t mq;
+	struct mq_attr attr;
+	char buffer[maxmsg + 1];
+
+	/* initialize the queue attributes */
+	 attr.mq_flags = 0;
+	 attr.mq_maxmsg = maxmsg;
+	 attr.mq_msgsize = sizeof(int);
+	 attr.mq_curmsgs = 0;
+
+	/* create the message queue */
+	mq = mq_open(buffer, O_RDWR);
+
 	//Create all producer processes
-	int id;
-	int pid;
+	int id; //Id for forks
+	int pid; // Prroducer ID
+
+	//Track how many nums are produced
 	int numProduced = 0;
-	buffer = malloc( maxmsg * sizeof(int));
 
 	//Create all producers
 	for(pid = 0; pid < num_p; pid++){
 		id = fork();
 		//If it is the child process it is therefore a producer and should do producer work
 		if ( id==0){
-			//Critical section
-			semWait();
-			producerWork(id, num, num_p, numProduced);
-			semSignal();
-			kill;
+			producerWork(p_id, num_p, numProduced, num);
 		}
 	}
 
-	int cid;
+	int cid; //Consumer ID
 	//Create all consumer processes
 	for(cid = 0; cid < num_c; cid++){
 		id = fork();
 		//If it is the child process it is therefore a consumer and should do produconsumercer work
 		if ( id==0){
-			//Critical section
 			consumerWork(i);
 		}
 	}
 	
-	//Wait for processes to finish
+	//Close message queue as it is no longer needed
+	int close = mq_close(mq);
+	if(close == -1){
+		printf("Error closing message queue.")
+		return -1;
+	}
 
     gettimeofday(&tv, NULL);
     g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
@@ -94,32 +94,53 @@ int main(int argc, char *argv[])
 }
 
 //Push integers onto buffer based on formula integer = id%nump
-void producerWork (int p_id, int N, int P, int &numCreated){
+void producerWork (int p_id, int P , int &numCreated, int N){
 	int i = 0;
-	while(i < N/P){
-		if(mq_curmsgs >= maxmsg)
-			wait();
-		if(i%P ==id){
-			// buffer.push(i);
-			mq_send(mq, buffer, size_t, unsigned)
-			mq_curmsgs++;
+	int product;
+	int send;
+	while(1){
+		if(i%P==p_id){
+			product = i;
+			send = mq_send(mq, (char*)product, sizeof(char*), 1);
+			if(send == -1){
+				printf("Error in sending to message queue.")
+				return -1;
+			}	
 			i++;
+			numCreated++;
 		}
+
+		//Check if we've produced all the required values, if so, send kill signal to consumers
+		if(numCreated == N){
+			mq_send(mq, (char*)(-1), sizeof(int), 1);
+			kill;
+		}
+
 	}	
 }
 //Take integers off of buffer and calculate square root
-void consumerWork (int c_id, int N, int &numCreated)
-	int work;
+void consumerWork (int c_id, int N, int &numCreated){
+	char *buffer;
 	double root;
-	while(buffer.size > 0){
-		if(numCreated == 0)
-			//Exit
-		work = buffer.pop;
-		root = sqrt(work);
+	ssize_t receive;
+	while(1){
+		receive = mq_receive(mq, buffer, sizeof(char*), 1);
+		if(receive == -1){
+			printf("Error in receiving message from message queue.");
+			return -1;
+		}
+		//Cast buffer to value of message (int)
+		buffer = (int)buffer;
+
+		//Check if kill signal was sentt by producer therefore all numbers have been sent
+		if(buffer == -1){
+			kill;
+		}
+
+		root = sqrt(buffer);
 		//Check if root is an integer
 		if(floor(root) == root){
-			printf("%d %d %d", c_id, work, root)
+			printf("%d %d %d", c_id, buffer, root)
 		}
 	}
-	printf(id, input, output);
 }
