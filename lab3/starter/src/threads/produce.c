@@ -41,8 +41,7 @@ void *consumer(void *arguments);
 
 int main(int argc, char *argv[])
 {
-	sem_init(&empty_list, 0, 1);
-	sem_init(&filled_list, 0, 1);
+	
 	struct timeval tv;
 	int num;
 	int maxmsg;
@@ -59,6 +58,9 @@ int main(int argc, char *argv[])
 	maxmsg = atoi(argv[2]); /* buffer size                */
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
+
+	sem_init(&empty_list, 0, maxmsg);
+	sem_init(&filled_list, 0, 0);
 
 	buffer = malloc(maxmsg * sizeof(int));
 	pthread_mutex_init(&mutex, NULL);
@@ -131,10 +133,10 @@ void *producer(void *arguments)
 		sem_wait(&empty_list);
 		pthread_mutex_lock(&mutex);
 		buffer[index_p] = i;
-		printf("%d\n", buffer[index_p]);
 		index_p = (index_p + 1) % (*args).maxmsg;
 		pthread_mutex_unlock(&mutex);
 		sem_post(&filled_list);
+		i++;
 	}
 	free(args);
 	pthread_exit(NULL);
@@ -148,7 +150,7 @@ void *consumer(void *arguments)
 	int work;
 	double root;
 
-	while (numread < (*args).num)
+	while (numread <= (*args).num)
 	{
 
 		sem_wait(&filled_list);
@@ -170,6 +172,7 @@ void *consumer(void *arguments)
 			printf("%d %d %d\n", (*args).index, work, (int)root);
 		}
 	}
+	
 	pthread_mutex_unlock(&mutex);
 	sem_post(&filled_list);
 	free(args);
