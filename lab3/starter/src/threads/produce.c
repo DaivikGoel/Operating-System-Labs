@@ -1,7 +1,6 @@
 // Use this to see if a number has an integer square root
 #define EPS 1.E-7
 
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +13,7 @@
 #include <sys/wait.h>
 #include <math.h>
 #include <pthread.h>
-#include <semaphore.h> // added thism
+#include <semaphore.h> // added this
 
 double g_time[2];
 
@@ -22,8 +21,10 @@ pthread_mutex_t mutex;
 
 sem_t empty_list;
 sem_t filled_list;
+
 int *buffer;
 int index_p;
+int index_c;
 int numread = 0;
 
 struct arg_struct
@@ -35,18 +36,21 @@ struct arg_struct
 	int num_c;
 };
 
+void *producer(void *arguments);
+void *consumer(void *arguments);
+
 int main(int argc, char *argv[])
 {
-	int i;
+	sem_init(&empty_list, 0, 1);
+	sem_init(&filled_list, 0, 1);
 	struct timeval tv;
 	int num;
 	int maxmsg;
 	int num_p;
 	int num_c;
-	int index_p;
-	int index_c;
 
-	if (argc != 5) {
+	if (argc != 5)
+	{
 		printf("Usage: %s <N> <B> <P> <C>\n", argv[0]);
 		exit(1);
 	}
@@ -55,86 +59,107 @@ int main(int argc, char *argv[])
 	maxmsg = atoi(argv[2]); /* buffer size                */
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
-	
+
 	buffer = malloc(maxmsg * sizeof(int));
 	pthread_mutex_init(&mutex, NULL);
-	int total = num_p + num_c;
-	pthread_t producers [num_p];
+	pthread_t producers[num_p];
 	pthread_t consumers[num_c];
 	index_p = 0;
 	index_c = 0;
 
 	gettimeofday(&tv, NULL);
-	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
+	g_time[0] = (tv.tv_sec) + tv.tv_usec / 1000000.;
+
 
 
 	for (int i = 0; i < num_p; i++)
 	{
-		struct arg_struct pargs;
-		pargs.index = i;
-		pargs.maxmsg = maxmsg;
-		pargs.num = num;
-		pargs.num_p = num_p;
+		struct arg_struct *pargs;
+		pargs = malloc(sizeof(struct arg_struct));
+		(*pargs).index = i;
+		(*pargs).maxmsg = maxmsg;
+		(*pargs).num = num;
+		(*pargs).num_p = num_p;
 
-
-		pthread_create(&producers[i], NULL, producer(), (void*)&pargs );
+		pthread_create(&producers[i], NULL, producer, (void *)pargs);
 	}
 
 	for (int j = 0; j < num_c; j++)
 	{
-		struct arg_struct cargs;
-		cargs.index = j;
-		cargs.maxmsg = maxmsg;
-		cargs.num = num;
-		cargs.num_c = num_c;
+		struct arg_struct *cargs;
+		cargs = malloc(sizeof(struct arg_struct));
+		(*cargs).index = j;
+		(*cargs).maxmsg = maxmsg;
+		(*cargs).num = num;
+		(*cargs).num_c = num_c;
 
-		pthread_create(&consumers[j], NULL, consumer(), (void*)&cargs);
+		pthread_create(&consumers[j], NULL, consumer, (void *)cargs);
+	}
+	for (int h = 0; h < num_p; h++)
+	{
+		pthread_join(producers[h], NULL);
+	}
+	for (int e = 0; e < num_c; e++)
+	{
+		pthread_join(consumers[e], NULL);
 	}
 
-	gettimeofday(&tv, NULL);
-    g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
+	free( buffer);
+	pthread_mutex_destroy(&mutex);
+	sem_destroy(&empty_list);
+	sem_destroy(&filled_list);
 	
-    printf("System execution time: %.6lf seconds\n", \
-            g_time[1] - g_time[0]);
+
+	gettimeofday(&tv, NULL);
+	g_time[1] = (tv.tv_sec) + tv.tv_usec / 1000000.;
+	
+	
+	
+
+	printf("System execution time: %.6lf seconds\n",
+		   g_time[1] - g_time[0]);
 	exit(0);
 }
 
-void producer(void* arguments )
+void *producer(void *arguments)
 {
-	struct arg_struct args = (struct arg_struct*)(*arguments);
-
+	struct arg_struct *args = (struct arg_struct *)(arguments);
 	int i = 0;
-	while (i < args.num / args.num_p)
+	while (i < (*args).num / (*args).num_p)
 	{
-
-		sem_wait(&emptylist);								   
-		pthread_mutex_lock(&mutex);						   
-		buffer[index_p] = i;						   
-		index_p = (index_p + 1) % args.maxmsg; 
-		pthread_mutex_unlock(&mutex);					   
-		sem_post(&filled_list);								   
+		
+		sem_wait(&empty_list);
+		pthread_mutex_lock(&mutex);
+		buffer[index_p] = i;
+		printf("%d\n", buffer[index_p]);
+		index_p = (index_p + 1) % (*args).maxmsg;
+		pthread_mutex_unlock(&mutex);
+		sem_post(&filled_list);
 	}
 	free(args);
 	pthread_exit(NULL);
 }
 
-void consumer(void *arguments){
+void *consumer(void *arguments)
+{
 
-	struct arg_struct args = arguments;
+	struct arg_struct *args = (struct arg_struct *)arguments;
 
 	int work;
 	double root;
-	
-	while(numread < args.num){
+
+	while (numread < (*args).num)
+	{
 
 		sem_wait(&filled_list);
 		pthread_mutex_lock(&mutex);
 
 		work = buffer[index_c];
-		index_c = (index_c + 1 ) % args.maxmsg;
+		index_c = (index_c + 1) % (*args).maxmsg;
 		numread++;
-		if(numread == args.num){
-			sem_post(&filled_list)
+		if (numread == (*args).num)
+		{
+			sem_post(&filled_list);
 		}
 		pthread_mutex_unlock(&mutex);
 		sem_post(&empty_list);
@@ -142,11 +167,11 @@ void consumer(void *arguments){
 		root = sqrt(work);
 		if (floor(root) == root)
 		{
-			printf("%d %d %d", c_id, work, root)
+			printf("%d %d %d\n", (*args).index, work, (int)root);
 		}
 	}
 	pthread_mutex_unlock(&mutex);
-	sem_post(&filled_list)
-
+	sem_post(&filled_list);
+	free(args);
 	pthread_exit(NULL);
 }
