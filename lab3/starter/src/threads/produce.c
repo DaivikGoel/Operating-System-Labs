@@ -126,17 +126,19 @@ int main(int argc, char *argv[])
 void *producer(void *arguments)
 {
 	struct arg_struct *args = (struct arg_struct *)(arguments);
-	int i = 0;
-	while (i < (*args).num / (*args).num_p)
+	int i = (*args).index;
+	while (1)
 	{
-		
-		sem_wait(&empty_list);
-		pthread_mutex_lock(&mutex);
-		buffer[index_p] = i;
-		index_p = (index_p + 1) % (*args).maxmsg;
-		pthread_mutex_unlock(&mutex);
-		sem_post(&filled_list);
-		i++;
+		if (i > (*args).num - 1 ){
+			break;
+		}
+			sem_wait(&empty_list);
+			pthread_mutex_lock(&mutex);
+			buffer[index_p] = i;
+			index_p = (index_p + 1) % (*args).maxmsg;
+			pthread_mutex_unlock(&mutex);
+			sem_post(&filled_list);
+			i = i + (*args).num_p;
 	}
 	free(args);
 	pthread_exit(NULL);
@@ -172,7 +174,7 @@ void *consumer(void *arguments)
 			printf("%d %d %d\n", (*args).index, work, (int)root);
 		}
 	}
-	
+
 	pthread_mutex_unlock(&mutex);
 	sem_post(&filled_list);
 	free(args);
