@@ -1,0 +1,5 @@
+source("/Volumes/d3goel/ECE-254-Working/ECE254/lab3/starter/src/threads/lab3-stats.csv")
+source("/Volumes/d3goel/ECE-254-Working/ECE254/lab3/starter/src/threads/lab3-stats.csv")
+source("/Volumes/d3goel/ECE-254-Working/ECE254/lab3/starter/src/threads/lab3-stats.csv")
+load(".RData")
+ls()
