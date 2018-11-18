@@ -36,6 +36,7 @@ struct arg_struct
 	int num_c;
 };
 
+//Producer and consumer functions
 void *producer(void *arguments);
 void *consumer(void *arguments);
 
@@ -54,6 +55,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	//Extract command line arguments
 	num = atoi(argv[1]);	/* number of items to produce */
 	maxmsg = atoi(argv[2]); /* buffer size                */
 	num_p = atoi(argv[3]);  /* number of producers        */
@@ -62,6 +64,7 @@ int main(int argc, char *argv[])
 	sem_init(&empty_list, 0, maxmsg);
 	sem_init(&filled_list, 0, 0);
 
+	//Allocate memory for buffer
 	buffer = malloc(maxmsg * sizeof(int));
 	pthread_mutex_init(&mutex, NULL);
 	pthread_t producers[num_p];
@@ -73,9 +76,10 @@ int main(int argc, char *argv[])
 	g_time[0] = (tv.tv_sec) + tv.tv_usec / 1000000.;
 
 
-
+	//Create num_p producer threads
 	for (int i = 0; i < num_p; i++)
 	{
+		//Create structure of data to send to producer thread
 		struct arg_struct *pargs;
 		pargs = malloc(sizeof(struct arg_struct));
 		(*pargs).index = i;
@@ -86,8 +90,10 @@ int main(int argc, char *argv[])
 		pthread_create(&producers[i], NULL, producer, (void *)pargs);
 	}
 
+	//Create num_p consumer threads
 	for (int j = 0; j < num_c; j++)
 	{
+		//Create structure of data to send to producer thread
 		struct arg_struct *cargs;
 		cargs = malloc(sizeof(struct arg_struct));
 		(*cargs).index = j;
@@ -97,15 +103,18 @@ int main(int argc, char *argv[])
 
 		pthread_create(&consumers[j], NULL, consumer, (void *)cargs);
 	}
+	//Wait for all producer threads to finish by joining them
 	for (int h = 0; h < num_p; h++)
 	{
 		pthread_join(producers[h], NULL);
 	}
+	//Wait for all consumer threads to finish by joining them
 	for (int e = 0; e < num_c; e++)
 	{
 		pthread_join(consumers[e], NULL);
 	}
 
+	//Free memory allocated for buffer
 	free( buffer);
 	pthread_mutex_destroy(&mutex);
 	sem_destroy(&empty_list);
@@ -115,9 +124,6 @@ int main(int argc, char *argv[])
 	gettimeofday(&tv, NULL);
 	g_time[1] = (tv.tv_sec) + tv.tv_usec / 1000000.;
 	
-	
-	
-
 	printf("System execution time: %.6lf seconds\n",
 		   g_time[1] - g_time[0]);
 	exit(0);
@@ -132,13 +138,16 @@ void *producer(void *arguments)
 		if (i > (*args).num - 1 ){
 			break;
 		}
-			sem_wait(&empty_list);
-			pthread_mutex_lock(&mutex);
-			buffer[index_p] = i;
-			index_p = (index_p + 1) % (*args).maxmsg;
-			pthread_mutex_unlock(&mutex);
-			sem_post(&filled_list);
-			i = i + (*args).num_p;
+		//Protect critical section (Writing to buffer) with semaphore
+		sem_wait(&empty_list);
+		pthread_mutex_lock(&mutex);
+
+		//Write to buffer
+		buffer[index_p] = i;
+		index_p = (index_p + 1) % (*args).maxmsg;
+		pthread_mutex_unlock(&mutex);
+		sem_post(&filled_list);
+		i = i + (*args).num_p;
 	}
 	free(args);
 	pthread_exit(NULL);
@@ -154,10 +163,11 @@ void *consumer(void *arguments)
 
 	while (numread <= (*args).num)
 	{
-
+		//Protect critical section (Reading from buffer) with semaphore
 		sem_wait(&filled_list);
 		pthread_mutex_lock(&mutex);
 
+		//Read from buffer
 		work = buffer[index_c];
 		index_c = (index_c + 1) % (*args).maxmsg;
 		numread++;
