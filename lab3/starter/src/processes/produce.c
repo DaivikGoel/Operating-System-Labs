@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 	}
 
 	int* return_value;
-	//Wait for producer processors to be finished
+	//Wait for producer processes to be finished so we can send kill signal to end of message queue
 	for(i = 0; i < num_p; i++){
 		waitpid(producer_ids[i], return_value, 0);
 	}
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 		}
 	} 
 
-	//Wait for consumers
+	//Wait for consumer proccesses to be finished so we can close the queue and end program
 	for(i = 0; i < num_c; i++){
 		waitpid(consumer_ids[i], return_value, 0);
 	}
@@ -124,6 +124,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	//Free memory allocated for producer/consumer ids
 	free(producer_ids);
 	free(consumer_ids);
 
@@ -143,6 +144,7 @@ void producerWork (int p_id, int P, int N){
 	for(i = 0; i < N; i++){
 		//Chceck if number meets reuqirements to be put on message queue
 		if(i%P==p_id){
+			//Send to message queue
 			send = mq_send(mq, (char*)&i, sizeof(int), 0);
 			if(send == -1){
 				perror("Error in sending to message queue.\n");
@@ -158,6 +160,7 @@ void consumerWork (int c_id){
 	int work;
 	ssize_t receive;
 	while(1){
+		//Read from message queue
 		receive = mq_receive(mq, (char*)&work, sizeof(int), 0);
 		if(receive == -1){
 			perror("Error in receiving message from message queue.\n");
