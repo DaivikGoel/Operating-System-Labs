@@ -86,7 +86,7 @@ $RECYCLE.BIN/
 .AppleDesktop
 Network Trash Folder
 Temporary Items
-
+.DS_Store
 
 # backup from from editor
 *~
