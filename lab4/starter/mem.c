@@ -13,11 +13,13 @@
 /* defines */
 struct ll_node {
 	int size; // size of memory
-	int state; // if the linked list is free or not
+	int state; // if the linked list is free or not 0 means free 1 means occupied
+	void *mem;
 	struct ll_node* previous; // points to previous node
 	struct ll_node* next; // points to next node
 
 }
+
 /* global variables */
 ll_node* best;
 ll_node* worst
@@ -29,20 +31,27 @@ int best_fit_memory_init(size_t size)
 {
 	best = malloc(size); // allocate the memory space
 	
-	struct node* first = best;
+	struct ll_node* first = best;
+	first -> size = size - sizeof(struct ll_node); // whatever the remaining size of the memory space is will be the remaining space
+	first -> state = 0;
+	first -> previous = NULL;
+	first -> next = NULL;
+	first -> mem = size + sizeof(struct ll_node);
 
+	return 0;
 
-
-	// To be completed by students
-	// You call malloc once here to obtain the memory to be managed.
-	
 }
 
 int worst_fit_memory_init(size_t size)
 {
 	worst = malloc(size);
-	// To be completed by students
-	// You call malloc once here to obtain the memory to be managed.
+
+	struct ll_node *first = worst;
+	first -> size = size - sizeof(struct ll_node); // whatever the remaining size of the memory space is will be the remaining space
+	first -> state = 0;
+	first -> previous = NULL;
+	first -> next = NULL;
+	first -> mem = size + sizeof(struct ll_node);
 	return 0;
 
 }
