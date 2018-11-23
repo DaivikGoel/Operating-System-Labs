@@ -60,9 +60,45 @@ int worst_fit_memory_init(size_t size)
 void *best_fit_alloc(size_t size)
 {
 	// To be completed by students
+	struct ll_node* best = NULL;
+	struct ll_node* move = best;
+	int diff = 0;
+
+	while( move != NULL){
+	if(move -> size >= size && move -> state = 0 && ( best == NULL || (move -> size < best -> size ))){
+
+		best = move;
+	}
+	else 
+		move = move -> next;
+	} // Find biggest memory block
+
+	best -> state = 1;
+	
+	diff = (best -> size ) - size;
+	
+	if(diff == 0){
+
+	return best -> mem;
+
+	}
+
+	else {
+
+	diff = diff - sizeof(struct ll_node);
+
+	if(diff < 0 ){
+		
+		best -> size = size + (best -> size);
+
+
+
+	}
+
+
 	return NULL;
 }
-
+}
 
 void *worst_fit_alloc(size_t size)
 {
