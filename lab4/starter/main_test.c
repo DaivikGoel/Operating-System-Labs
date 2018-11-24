@@ -15,49 +15,85 @@
  */
 #include "mem.h"
 
+void test1_best_fit()
+{
+		printf("Test 1 Best Fit \n");
+		best_fit_memory_init(1000);
 
+		void *a = best_fit_alloc(200);
+		void *b = best_fit_alloc(200);
+		void *c = best_fit_alloc(200);
+		void *d = best_fit_alloc(200);
+
+		printf("Full\n");
+		printCurrentAllocs(1);
+		printf("---\n");
+
+		best_fit_dealloc(a);
+		best_fit_dealloc(c);
+
+		printf("Freed blocks 1 and 3\n");
+		printCurrentAllocs(1);
+		printf("---\n");
+
+		//best_fit_alloc(100);
+		printf("Allocated 100, should go into block 1\n");
+		printCurrentAllocs(1);
+		printf("---\n");
+
+		return;
+
+}
 
 int main(int argc, char *argv[])
 {
-	int num = 0;
-	int algo = 0; // default algorithm to test is best fit  
-	void *p, *q;
 
-	if (argc != 2) {
-		fprintf(stderr, "Usage: %s <0/1>. 0 for best fit and 1 for worst fit \n", argv[0]);
-		exit (1);
-	} else if (!strcmp(argv[1], "1") || !strcmp(argv[1], "0")) {
-		algo = atoi(argv[1]);
-	} else {
-		fprintf(stderr, "Invalid argument, please specify 0 or 1\n");
-		exit(1);
-	}
-	
-	if ( algo == 0 ) {
-		best_fit_memory_init(1024);	// initizae 1KB, best fit
-
-		p = best_fit_alloc(8);		// allocate 8B
-		printf("best fit: p=%p\n", p);
-		if ( p != NULL ) {
-			best_fit_dealloc(p);	
-		}
-		num = best_fit_count_extfrag(4);
-	} else if ( algo == 1 ) {
-
-		worst_fit_memory_init(1024);	// initizae 1KB, worst fit
-
-		q = worst_fit_alloc(8);		// allocate 8B
-		printf("worst fit: q=%p\n", q);
-		if ( q != NULL ) {
-			worst_fit_dealloc(q);	
-		}
-		num = worst_fit_count_extfrag(4);
-	} else {
-		fprintf(stderr, "Should not reach here!\n");
-		exit(1);
-	}
-
-	printf("num = %d\n", num);
+	test1_best_fit();
 
 	return 0;
 }
+
+// int main(int argc, char *argv[])
+// {
+// 	int num = 0;
+// 	int algo = 0; // default algorithm to test is best fit  
+// 	void *p, *q;
+
+// 	if (argc != 2) {
+// 		fprintf(stderr, "Usage: %s <0/1>. 0 for best fit and 1 for worst fit \n", argv[0]);
+// 		exit (1);
+// 	} else if (!strcmp(argv[1], "1") || !strcmp(argv[1], "0")) {
+// 		algo = atoi(argv[1]);
+// 	} else {
+// 		fprintf(stderr, "Invalid argument, please specify 0 or 1\n");
+// 		exit(1);
+// 	}
+	
+// 	if ( algo == 0 ) {
+// 		best_fit_memory_init(1024);	// initizae 1KB, best fit
+
+// 		p = best_fit_alloc(8);		// allocate 8B
+// 		printf("best fit: p=%p\n", p);
+// 		if ( p != NULL ) {
+// 			best_fit_dealloc(p);	
+// 		}
+// 		num = best_fit_count_extfrag(4);
+// 	} else if ( algo == 1 ) {
+
+// 		worst_fit_memory_init(1024);	// initizae 1KB, worst fit
+
+// 		q = worst_fit_alloc(8);		// allocate 8B
+// 		printf("worst fit: q=%p\n", q);
+// 		if ( q != NULL ) {
+// 			worst_fit_dealloc(q);	
+// 		}
+// 		num = worst_fit_count_extfrag(4);
+// 	} else {
+// 		fprintf(stderr, "Should not reach here!\n");
+// 		exit(1);
+// 	}
+
+// 	printf("num = %d\n", num);
+
+// 	return 0;
+// }
