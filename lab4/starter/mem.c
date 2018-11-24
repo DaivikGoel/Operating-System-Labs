@@ -13,45 +13,51 @@
 /* defines */
 struct ll_node {
 	int size; // size of memory
-	int state; // if the linked list is free or not 0 means free 1 means occupied
-	void *mem;
+	//int state; // if the linked list is free or not 0 means free 1 means occupied
+	void *startingAddy;
 	struct ll_node* previous; // points to previous node
 	struct ll_node* next; // points to next node
 
-}
+};
 
 /* global variables */
-ll_node* best;
-ll_node* worst
+//Data Structure
+struct ll_node* stackBest;
+struct ll_node* stackworst;
+int totalMemoryBest;
+int totalMemoryWorst;
 /* Functions */
-
 
 /* memory initializer */
 int best_fit_memory_init(size_t size)
 {
-	best = malloc(size); // allocate the memory space
+	totalMemoryBest = (int)size;
+	stackBest = malloc(sizeof((int)size)); // allocate the memory space
+
+	if(stackBest == -1)
+		return -1;
 	
-	struct ll_node* first = best;
-	first -> size = size - sizeof(struct ll_node); // whatever the remaining size of the memory space is will be the remaining space
-	first -> state = 0;
+	struct ll_node* first = stackBest;
+	//first -> size = size - sizeof(struct ll_node); // whatever the remaining size of the memory space is will be the remaining space
+	//first -> state = 0;
 	first -> previous = NULL;
 	first -> next = NULL;
-	first -> mem = size + sizeof(struct ll_node);
+	first -> startingAddy = sizeOfMemAlloc(stackBest) + sizeof(stackBest);
 
 	return 0;
-
 }
 
 int worst_fit_memory_init(size_t size)
 {
-	worst = malloc(size);
+	totalMemoryWorst = (int)size;
+	stackworst = malloc(sizeof((int)size));
 
-	struct ll_node *first = worst;
-	first -> size = size - sizeof(struct ll_node); // whatever the remaining size of the memory space is will be the remaining space
-	first -> state = 0;
+	struct ll_node *first = stackworst;
+	//first -> size = size - sizeof(struct ll_node); // whatever the remaining size of the memory space is will be the remaining space
+	//first -> state = 0;
 	first -> previous = NULL;
 	first -> next = NULL;
-	first -> mem = size + sizeof(struct ll_node);
+	first -> startingAddy = sizeOfMemAlloc(stackworst) + sizeof(stackworst);
 	return 0;
 
 }
@@ -60,44 +66,46 @@ int worst_fit_memory_init(size_t size)
 void *best_fit_alloc(size_t size)
 {
 	// To be completed by students
-	struct ll_node* best = NULL;
-	struct ll_node* move = best;
-	int diff = 0;
 
-	while( move != NULL){
-	if(move -> size >= size && move -> state = 0 && ( best == NULL || (move -> size < best -> size ))){
+	//Handle inavlid cases
+	if((int)size <= 0)
+		return NULL;
+	else if((int)size > totalMemoryBest + sizeof(stackBest))
+		return NULL;
+	else if((int)size > (totalMemoryBest - sizeOfMemAlloc(stackBest)))
+		return NULL;
 
-		best = move;
-	}
-	else 
-		move = move -> next;
-	} // Find biggest memory block
+	// struct ll_node* best = NULL;
+	// struct ll_node* move = best;
+	// int diff = 0;
 
-	best -> state = 1;
+	// while( move != NULL){
+	// if(move -> size >= size && move -> state = 0 && ( best == NULL || (move -> size < best -> size ))){
+
+	// 	best = move;
+	// }
+	// else 
+	// 	move = move -> next;
+	// } // Find biggest memory block
+
+	// best -> state = 1;
 	
-	diff = (best -> size ) - size;
+	// diff = (best -> size ) - size;
 	
-	if(diff == 0){
+	// if(diff == 0){
 
-	return best -> mem;
+	// return best -> mem;
 
-	}
+	// }
+	// else {
+	// diff = diff - sizeof(struct ll_node);
 
-	else {
+	// if(diff < 0 ){
+	// 	best -> size = size + (best -> size);
+	// }
 
-	diff = diff - sizeof(struct ll_node);
-
-	if(diff < 0 ){
-		
-		best -> size = size + (best -> size);
-
-
-
-	}
-
-
-	return NULL;
-}
+	// return NULL;
+	// }
 }
 
 void *worst_fit_alloc(size_t size)
@@ -134,4 +142,18 @@ int worst_fit_count_extfrag(size_t size)
 {
 	// To be completed by students
 	return 0;
+}
+
+//Return size of memory currently allocated in stack
+int sizeOfMemAlloc(struct ll_node* stack)
+{
+	int i;
+	int numMemory = 0;
+	struct ll_node* traverse = stack;
+	//Traverse through linked lis and count hoe many bytes are allocated
+	while(traverse != NULL){
+		numMemory += traverse->size;
+		traverse = traverse->next;
+	}
+	return numMemory;
 }
