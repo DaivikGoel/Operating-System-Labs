@@ -47,6 +47,32 @@ void worst_fit1()
 	return;
 }
 
+void worst_fit2()
+{
+	printf("Worst Fit Test 2 \n");
+	worst_fit_memory_init(1000);
+
+	void *a = worst_fit_alloc(100);
+	void *b = worst_fit_alloc(100);
+	void *c = worst_fit_alloc(100);
+	void *d = worst_fit_alloc(100);
+
+	printf("Full\n");
+	printCurrentAllocs(1);
+	printf("---\n");
+
+	worst_fit_dealloc(a);
+	worst_fit_dealloc(b);
+	worst_fit_dealloc(c);
+	worst_fit_dealloc(d);
+
+	printf("Deallocating all blocks to see if deallocations is working \n");
+	printCurrentAllocs(1);
+	printf("---\n");
+
+	return;
+}
+
 void best_fit1()
 {
 	printf("Best Fit Test 1 \n");
@@ -76,6 +102,31 @@ void best_fit1()
 	return;
 }
 
+void best_fit2()
+{
+	printf("Best Fit Test 2 \n");
+	best_fit_memory_init(1000);
+
+	void *a = best_fit_alloc(100);
+	void *b = best_fit_alloc(100);
+	void *c = best_fit_alloc(100);
+	void *d = best_fit_alloc(100);
+
+	printf("Full\n");
+	printCurrentAllocs(1);
+	printf("---\n");
+
+	best_fit_dealloc(a);
+	best_fit_dealloc(b);
+	best_fit_dealloc(c);
+	best_fit_dealloc(d);
+
+	printf("Deallocating all blocks to see if deallocations is working \n");
+	printCurrentAllocs(1);
+	printf("---\n");
+
+	return;
+}
 
 void worst_vs_best_fragments()
 { // allocates a lot of small blocks deallocates some and allocates small spaces, makes fragments in best fit
@@ -227,9 +278,11 @@ void best_vs_worst_large_data()
 int main(int argc, char *argv[])
 {
 	worst_fit1();
+	worst_fit2();
 	best_fit1();
+	best_fit2();
 	// worst_vs_best_fragments();
-	best_vs_worst_large_data();
+	// best_vs_worst_large_data();
 
 	return 0;
 }
