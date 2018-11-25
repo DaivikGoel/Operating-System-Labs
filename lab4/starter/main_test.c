@@ -20,33 +20,61 @@
 // tests completely filling the mem space and deallocates two blocks and then allocates one into the larger free block
 void worst_fit1()
 {
-	printf("First test to see how worst fit is working\n");
-	worst_fit_memory_init(500);
+	printf("Worst Fit Test 1\n");
+	worst_fit_memory_init(600);
 
-	void *a = worst_fit_alloc(50);
-	void *b = worst_fit_alloc(60);
-	void *c = worst_fit_alloc(70);
-	void *d = worst_fit_alloc(80);
+	void *a = worst_fit_alloc(105);
+	void *b = worst_fit_alloc(95);
+	void *c = worst_fit_alloc(110);
+	void *d = worst_fit_alloc(60);
 
 	printf("Full\n");
 	printCurrentAllocs(0);
 	printf("---\n");
 
+	worst_fit_dealloc(a);
 	worst_fit_dealloc(c);
-	worst_fit_dealloc(d);
 
-	printf("Freed 70 and 80 byte blocks so new alloc should go to 80\n");
+	printf("Freed 1st and 3rd blocks so new alloc should go to 3rd block \n");
 	printCurrentAllocs(0);
 	printf("---\n");
 
 	worst_fit_alloc(70);
-	printf("New alloc should go to 80 even tho allocating 70\n");
+	printf("New alloc should go to 3rd block \n");
 	printCurrentAllocs(0);
 	printf("---\n");
 
 	return;
 }
 
+void best_fit1()
+{
+	printf("Best Fit Test 1 \n");
+	best_fit_memory_init(600);
+
+	void *a = best_fit_alloc(105);
+	void *b = best_fit_alloc(95);
+	void *c = best_fit_alloc(110);
+	void *d = best_fit_alloc(60);
+
+	printf("Full\n");
+	printCurrentAllocs(1);
+	printf("---\n");
+
+	best_fit_dealloc(a);
+	best_fit_dealloc(c);
+
+	printf("Freed 1st and 3rd blocks so new alloc should go to 1st block \n");
+	printCurrentAllocs(1);
+	printf("---\n");
+
+	best_fit_alloc(70);
+	printf("New alloc should go to 1st block \n");
+	printCurrentAllocs(1);
+	printf("---\n");
+
+	return;
+}
 
 void worst_vs_best_fragments()
 { // allocates a lot of small blocks deallocates some and allocates small spaces, makes fragments in best fit
@@ -197,7 +225,8 @@ void best_vs_worst_large_data()
 
 int main(int argc, char *argv[])
 {
-	worstfit1();
+	worst_fit1();
+	best_fit1();
 	// worst_vs_best_fragments();
 	best_vs_worst_large_data();
 
