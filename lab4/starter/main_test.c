@@ -76,6 +76,7 @@ void best_fit1()
 	return;
 }
 
+
 void worst_vs_best_fragments()
 { // allocates a lot of small blocks deallocates some and allocates small spaces, makes fragments in best fit
 	printf("Test Worst Fit Vs. Best Fit Fragments: Best Fit Case \n");
