@@ -17,7 +17,6 @@ struct ll_node {
 	void* startingAddy;
 	struct ll_node* previous; // points to previous node
 	struct ll_node* next; // points to next node
-
 };
 
 /* global variables */
@@ -31,17 +30,17 @@ void* listWorst;
 int best_fit_memory_init(size_t size)
 {
 	//Check if size is too small
-	if((int)size < sizeof(struct ll_node))
+	if(size < sizeof(struct ll_node))
 		return -1;
 	listBest = malloc(size); // allocate the memory space
 
-	if((int)listBest == -1)
+	if(listBest == -1)
 		return -1;
 	
 	struct ll_node* first = listBest;
 	first -> previous = NULL;
 	first -> next = NULL;
-	first -> size = (int)size - sizeof(struct ll_node);
+	first -> size = size - sizeof(struct ll_node);
 	first -> startingAddy = listBest + sizeof(struct ll_node);
 	first -> state = 0;
 
@@ -51,14 +50,14 @@ int best_fit_memory_init(size_t size)
 int worst_fit_memory_init(size_t size)
 {
 	//Check if size is too small
-	if((int)size < sizeof(struct ll_node))
+	if(size < sizeof(struct ll_node))
 		return -1;
-	listWorst = malloc(sizeof((int)size));
-	if ((int)listWorst == -1)
+	listWorst = malloc(sizeof(size));
+	if (listWorst == -1)
 		return -1;
 	
 	struct ll_node *first = listWorst;
-	first -> size = (int)size - sizeof(struct ll_node); // whatever the remaining size of the memory space is will be the remaining space
+	first -> size = size - sizeof(struct ll_node); // whatever the remaining size of the memory space is will be the remaining space
 	first -> previous = NULL;
 	first -> next = NULL;
 	first -> state = 0;
@@ -68,10 +67,11 @@ int worst_fit_memory_init(size_t size)
 }
 
 /* memory allocators */
+//Find smallest memory block
 void *best_fit_alloc(size_t size_requested)
 {
 	// To be completed by students
-	int size = makeDivisibleByFour((int)size_requested);
+	int size = makeDivisibleByFour(size_requested);
 	//Handle inavlid cases
 	if(size <= 0)
 		return NULL;
@@ -79,31 +79,29 @@ void *best_fit_alloc(size_t size_requested)
 	struct ll_node* best = NULL;
 	struct ll_node* move = listBest;
 	int diff;
-
+	
 	while (move != NULL)
 	{
 		//Check if current block is free and big enough for requested allocation
-		if ((move -> size) >= size  && move -> state == 0)
-		{
-			//If block hasnt been allocated or is smaller than last smallest block, then allocate space 
-			if(best == NULL || (move -> size < best -> size)){
-				best = move;
-			}	
+		if(move->state == 0 && move->size >= size && (best == NULL || move->size < best->size)) {
+			best = move;
 		}
 		move = move->next;
-	} //Find smallest memory block
+	} 
 
 	//Check if noadequate memory block was found
-	if( best == NULL){
-		return NULL;
-	}
+	// if( best->size<size){
+	// 	printf("Returned NULL on best case \n");
+	// 	return NULL;
+	// }
+	
 	best -> state = 1;
 	diff = (best->size) - size - sizeof(struct ll_node);
+	int diffToAdd = best->size - size;
 
 	//Check if there is free space leftover
-	if (diff < 0)
+	if (diff < 0 && diffToAdd > 0)
 	{
-		best -> size = size;
 		return best->startingAddy;
 	}
 	else if(diff >= 0)//Create node to control free space
@@ -125,40 +123,38 @@ void *best_fit_alloc(size_t size_requested)
 void *worst_fit_alloc(size_t size_requested)
 {
 	// To be completed by students
-	int size = makeDivisibleByFour((int)size_requested);
+	int size = makeDivisibleByFour(size_requested);
 	//Handle inavlid cases
 	if (size <= 0)
 		return NULL;
 	
-	struct ll_node *worst = NULL; 
-	struct ll_node *move = listWorst;
+	struct ll_node* worst = NULL; 
+	struct ll_node* move = listWorst;
 	int diff;
 
+	// Find largest memory block
 	while (move != NULL)
 	{
 		//Check if current block is free and big enough for requested allocation
-		if ((move -> size) >= size && move -> state == 0)
-		{
-			//If block hasnt been allocated or is smaller than last smallest block, then allocate space
-			if (worst == NULL || (move -> size > worst -> size))
-			{
-				worst = move;
-			}
+		if(traverse->state == 0 && traverse->size >= size && (best_fit == NULL || traverse->size < best_fit->size)) {
+			best_fit = traverse;
 		}
+		
 		move = move->next;
-	} // Find smallest memory block
+	} 
 
-	//Check if no adequate memory block was found
-	if( worst == NULL){
-		return NULL;
-	}
+	// //Check if no adequate memory block was found
+	// if(worst == listWorst && worst->size < size){
+	// 	printf("Returned NULL on worst case \n");
+	// 	return NULL;
+	// }
 	worst->state = 1;
 	diff = (worst->size) - size - sizeof(struct ll_node);
+	int diffToAdd = worst->size - size;
 
 	//Check if there is free space leftover
-	if (diff < 0)
+	if (diffToAdd > 0 && diff < 0)
 	{
-		worst -> size = size;
 		return worst -> startingAddy;
 	}
 	else if (diff >= 0) //Create node to control free space
@@ -195,7 +191,7 @@ void best_fit_dealloc(void *ptr)
 		traverse = traverse -> next;
 	}
 	if(traverse == NULL){
-		printf("Did not find ptr in list\n");
+		printf("Did not find ptr in best list (dealloc)\n");
 		return;
 	}
 	
@@ -204,11 +200,19 @@ void best_fit_dealloc(void *ptr)
 	if( traverse -> next != NULL && traverse -> next -> state == 0){
 		traverse -> state = 0;
 		traverse -> size += traverse -> next -> size + sizeof(struct ll_node);
-		removeNode(traverse -> next);					
+		removeNode(traverse -> next);	
+
+		//Check if there is also a free node 'previous'
+		if(traverse -> previous != NULL && traverse -> previous -> state == 0){
+			traverse -> previous -> size += traverse -> size + sizeof(struct ll_node);
+			removeNode(traverse);
+		}					
 	}
-	//Check if there is a free node 'previous'
+	//Check if there is  a free node 'previous'
 	else if(traverse -> previous != NULL && traverse -> previous -> state == 0){
+		traverse -> state =0;
 		traverse -> previous -> size += traverse -> size + sizeof(struct ll_node);
+		//Check if there is also a free node 'next'
 		removeNode(traverse);
 	}	
 	else
@@ -233,7 +237,7 @@ void worst_fit_dealloc(void *ptr)
 		traverse = traverse -> next;
 	}
 	if(traverse == NULL){
-		printf("Did not find ptr in list\n");
+		printf("Did not find ptr in worst list (dealloc)\n");
 		return;
 	}
 	
@@ -242,18 +246,23 @@ void worst_fit_dealloc(void *ptr)
 	if( traverse -> next != NULL && traverse -> next -> state == 0){
 		traverse -> state = 0;
 		traverse -> size += traverse -> next -> size + sizeof(struct ll_node);
-		removeNode(traverse -> next);		
+		removeNode(traverse -> next);	
+
+		//Check if there is also a free node 'previous'
+		if(traverse -> previous != NULL && traverse -> previous -> state == 0){
+			traverse -> previous -> size += traverse -> size + sizeof(struct ll_node);
+			removeNode(traverse);
+		}					
 	}
-	//Check if there is a free node 'previous'
+	//Check if there is  a free node 'previous'
 	else if(traverse -> previous != NULL && traverse -> previous -> state == 0){
+		traverse -> state =0;
 		traverse -> previous -> size += traverse -> size + sizeof(struct ll_node);
+		//Check if there is also a free node 'next'
 		removeNode(traverse);
 	}	
-	else{ //No free nodes nearby to merge
+	else
 		traverse -> state = 0;
-	}
-		
-	return;
 }
 
 /* memory algorithm metric utility function(s) */
@@ -265,7 +274,7 @@ int best_fit_count_extfrag(size_t size)
 	int count = 0;
 	struct ll_node* traverse = listBest;
 	while(traverse != NULL){
-		if(traverse -> size < (int)size && traverse -> state == 0)
+		if(traverse -> size < size && traverse -> state == 0)
 			count++;
 		traverse= traverse -> next;
 	}
@@ -278,25 +287,11 @@ int worst_fit_count_extfrag(size_t size)
 	int count = 0;
 	struct ll_node* traverse = listWorst;
 	while(traverse != NULL){
-		if(traverse -> size < (int)size && traverse -> state == 0)
+		if(traverse -> size < size && traverse -> state == 0)
 			count++;
 		traverse= traverse -> next;
 	}
 	return count;
-}
-
-//Return size of memory currently allocated in stack
-int sizeOfMemAlloc(void* stack)
-{
-	int i;
-	int numMemory = 0;
-	struct ll_node* traverse = stack;
-	//Traverse through linked lis and count hoe many bytes are allocated
-	while(traverse != NULL){
-		numMemory += (traverse->size) + sizeof(struct ll_node);
-		traverse = traverse->next;
-	}
-	return numMemory;
 }
 
 int makeDivisibleByFour (int input){
@@ -314,7 +309,7 @@ void printCurrentAllocs(int bestOrWorst){
 		traverse = listBest;
 	
 	while(traverse != NULL){
-		printf("Memory Address: %lu, Size: %d, State: %d\n", (long unsigned int)traverse, traverse->size, traverse->state);
+		printf("Memory Address: %lu, Size: %d, State: %d\n", traverse, traverse->size, traverse->state);
 		traverse = traverse->next;
 	}
 }
@@ -331,7 +326,7 @@ void removeNode(struct ll_node* pop){
 	if(pop->next!=NULL){
 		pop->next->previous = pop->previous;
 	}
-	else if (pop->previous != NULL)
+	if (pop->previous != NULL)
 	{
 		pop->previous->next = pop->next;
 	}
