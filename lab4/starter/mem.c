@@ -80,20 +80,23 @@ void *best_fit_alloc(size_t size_requested)
 	struct ll_node* move = listBest;
 	int diff;
 	
+	//Find smallest memory block
 	while (move != NULL)
 	{
 		//Check if current block is free and big enough for requested allocation
-		if(move->state == 0 && move->size >= size && (best == NULL || move->size < best->size)) {
-			best = move;
+		if(move->state == 0 && move->size >= size){
+			if(best == NULL || move->size < best->size){
+				best = move;
+			}	
 		}
 		move = move->next;
 	} 
 
 	//Check if noadequate memory block was found
-	// if( best->size<size){
-	// 	printf("Returned NULL on best case \n");
-	// 	return NULL;
-	// }
+	if( best->size < size){
+		printf("No adequate memory block was found \n");
+		return NULL;
+	}
 	
 	best -> state = 1;
 	diff = (best->size) - size - sizeof(struct ll_node);
@@ -127,7 +130,6 @@ void *worst_fit_alloc(size_t size_requested)
 	//Handle inavlid cases
 	if (size <= 0)
 		return NULL;
-	
 	struct ll_node* worst = NULL; 
 	struct ll_node* move = listWorst;
 	int diff;
@@ -135,20 +137,21 @@ void *worst_fit_alloc(size_t size_requested)
 	// Find largest memory block
 	while (move != NULL)
 	{
-		//Check if current block is free and big enough for requested allocation
-		if(traverse->state == 0 && traverse->size >= size && (best_fit == NULL || traverse->size < best_fit->size)) {
-			best_fit = traverse;
+		if (move->state == 0 && move->size >= size){
+			if (worst == NULL || move->size > worst -> size){
+				worst = move;
+			}
 		}
-		
 		move = move->next;
 	} 
+	//Check if no adequate memory block was found
+	if(worst->size < size){
+		printf("No adequate memory block was found \n");
+		return NULL;
+	}
 
-	// //Check if no adequate memory block was found
-	// if(worst == listWorst && worst->size < size){
-	// 	printf("Returned NULL on worst case \n");
-	// 	return NULL;
-	// }
-	worst->state = 1;
+
+	worst -> state = 1;
 	diff = (worst->size) - size - sizeof(struct ll_node);
 	int diffToAdd = worst->size - size;
 
@@ -185,55 +188,8 @@ void best_fit_dealloc(void *ptr)
 	struct ll_node* traverse = listBest;
 	//Find node to de-alloc
 	while(traverse != NULL){
-		if(traverse -> startingAddy == ptr){
+		if(traverse -> startingAddy == ptr)
 			break;												
-		}
-		traverse = traverse -> next;
-	}
-	if(traverse == NULL){
-		printf("Did not find ptr in best list (dealloc)\n");
-		return;
-	}
-	
-	//Check if there is free space to me merged together
-	//Check if there is a free node 'next'
-	if( traverse -> next != NULL && traverse -> next -> state == 0){
-		traverse -> state = 0;
-		traverse -> size += traverse -> next -> size + sizeof(struct ll_node);
-		removeNode(traverse -> next);	
-
-		//Check if there is also a free node 'previous'
-		if(traverse -> previous != NULL && traverse -> previous -> state == 0){
-			traverse -> previous -> size += traverse -> size + sizeof(struct ll_node);
-			removeNode(traverse);
-		}					
-	}
-	//Check if there is  a free node 'previous'
-	else if(traverse -> previous != NULL && traverse -> previous -> state == 0){
-		traverse -> state =0;
-		traverse -> previous -> size += traverse -> size + sizeof(struct ll_node);
-		//Check if there is also a free node 'next'
-		removeNode(traverse);
-	}	
-	else
-		traverse -> state = 0;
-	return;
-}
-
-void worst_fit_dealloc(void *ptr) 
-{
-	// To be completed by students
-	if(ptr == NULL){
-		printf("Pointer passed in was NULL \n");
-		return;
-	}
-		
-	struct ll_node* traverse = listWorst;
-	//Find node to de-alloc
-	while(traverse != NULL){
-		if(traverse -> startingAddy == ptr){
-			break;												
-		}
 		traverse = traverse -> next;
 	}
 	if(traverse == NULL){
@@ -254,11 +210,51 @@ void worst_fit_dealloc(void *ptr)
 			removeNode(traverse);
 		}					
 	}
-	//Check if there is  a free node 'previous'
+	//Check if there is just a free node 'previous'
 	else if(traverse -> previous != NULL && traverse -> previous -> state == 0){
-		traverse -> state =0;
 		traverse -> previous -> size += traverse -> size + sizeof(struct ll_node);
-		//Check if there is also a free node 'next'
+		removeNode(traverse);
+	}	
+	else
+		traverse -> state = 0;
+}
+
+void worst_fit_dealloc(void *ptr) 
+{
+	// To be completed by students
+	if(ptr == NULL){
+		printf("Pointer passed in was NULL \n");
+		return;
+	}
+		
+	struct ll_node* traverse = listWorst;
+	//Find node to de-alloc
+	while(traverse != NULL){
+		if(traverse -> startingAddy == ptr)
+			break;												
+		traverse = traverse -> next;
+	}
+	if(traverse == NULL){
+		printf("Did not find ptr in worst list (dealloc)\n");
+		return;
+	}
+	
+	//Check if there is free space to be merged together
+	//Check if there is a free node 'next'
+	if( traverse -> next != NULL && traverse -> next -> state == 0){
+		traverse -> state = 0;
+		traverse -> size += traverse -> next -> size + sizeof(struct ll_node);
+		removeNode(traverse -> next);	
+
+		//Check if there is also a free node 'previous'
+		if(traverse -> previous != NULL && traverse -> previous -> state == 0){
+			traverse -> previous -> size += traverse -> size + sizeof(struct ll_node);
+			removeNode(traverse);
+		}					
+	}
+	//Check if there is just a free node 'previous'
+	else if(traverse -> previous != NULL && traverse -> previous -> state == 0){
+		traverse -> previous -> size += traverse -> size + sizeof(struct ll_node);
 		removeNode(traverse);
 	}	
 	else
