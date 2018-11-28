@@ -8,6 +8,7 @@
 /* includes */
 #include <stdio.h> 
 #include <stdlib.h> 
+#include <stdint.h>
 #include "mem.h"
 
 /* defines */
@@ -25,6 +26,10 @@ void* listBest;
 void* listWorst;
 
 /* Functions */
+int makeDivisibleByFour(int input);
+void printCurrentAllocs(int bestOrWorst);
+void insert_node(struct ll_node* previousnode , struct ll_node* insertnode);
+void removeNode(struct ll_node* pop);
 
 /* memory initializer */
 int best_fit_memory_init(size_t size)
@@ -34,7 +39,7 @@ int best_fit_memory_init(size_t size)
 		return -1;
 	listBest = malloc(size); // allocate the memory space
 
-	if(listBest == -1)
+	if((int)listBest == -1)
 		return -1;
 	
 	struct ll_node* first = listBest;
@@ -53,7 +58,7 @@ int worst_fit_memory_init(size_t size)
 	if(size < sizeof(struct ll_node))
 		return -1;
 	listWorst = malloc(sizeof(size));
-	if (listWorst == -1)
+	if ((int)listWorst == -1)
 		return -1;
 	
 	struct ll_node *first = listWorst;
@@ -110,12 +115,12 @@ void *best_fit_alloc(size_t size_requested)
 	else if(diff >= 0)//Create node to control free space
 	{
 		//Enough free space is avaialbe to create free space node
-		struct ll_node* freeSpace = best->startingAddy + size;
+		struct ll_node* freeSpace = (best -> startingAddy) + (intptr_t)size;
 		freeSpace -> size = diff;
 		freeSpace -> state = 0;
-		freeSpace -> startingAddy = freeSpace + 1;
-		freeSpace -> next == NULL;
-		freeSpace -> previous == NULL;
+		freeSpace -> startingAddy = freeSpace + sizeof(struct ll_node);
+		freeSpace -> next = NULL;
+		freeSpace -> previous = NULL;
 
 		best -> size = size;
 		insert_node(best, freeSpace);
@@ -124,12 +129,13 @@ void *best_fit_alloc(size_t size_requested)
 }
 
 void *worst_fit_alloc(size_t size_requested)
-{
+{	
 	// To be completed by students
 	int size = makeDivisibleByFour(size_requested);
 	//Handle inavlid cases
 	if (size <= 0)
 		return NULL;
+
 	struct ll_node* worst = NULL; 
 	struct ll_node* move = listWorst;
 	int diff;
@@ -163,12 +169,12 @@ void *worst_fit_alloc(size_t size_requested)
 	else if (diff >= 0) //Create node to control free space
 	{
 		//Enough free space is avaialbe to create free space node
-		struct ll_node *freeSpace = worst -> startingAddy + size;
+		struct ll_node *freeSpace = (worst -> startingAddy) + (intptr_t)size;
 		freeSpace -> size = diff;
 		freeSpace -> state = 0;
-		freeSpace -> startingAddy = freeSpace + 1;
-		freeSpace -> next == NULL;
-		freeSpace -> previous == NULL;
+		freeSpace -> startingAddy = freeSpace + sizeof(struct ll_node);
+		freeSpace -> next = NULL;
+		freeSpace -> previous = NULL;
 
 		worst->size = size;
 		insert_node(worst, freeSpace);
@@ -315,6 +321,8 @@ void insert_node(struct ll_node* previousnode , struct ll_node* insertnode){
 	insertnode -> next = previousnode -> next;
 	previousnode -> next = insertnode;
 	insertnode -> previous  = previousnode;
+	if(insertnode -> next != NULL)
+		insertnode -> next -> previous = insertnode;
 }
 
 //Remove a node from the linked list
