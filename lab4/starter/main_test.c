@@ -266,6 +266,14 @@ void best_vs_worst_large_data()
     worst_fit_dealloc(b);
     printf("Worst fit after de - alloc: \n");
     printCurrentAllocs(0);
+    int i;
+    for (i = 0; i < 10; i++)
+    {
+        printf("made it to iteration: %d\n", i);
+        worst_fit_alloc(20);
+    }
+
+    void *kB_worst = worst_fit_alloc(4);
 
     //create best fit memory space with divider in middle
     printf("Best fit: \n");
@@ -282,38 +290,30 @@ void best_vs_worst_large_data()
     printf("Best fit after de - alloc: \n");
     printCurrentAllocs(1);
 
-     int i;
      for (i = 0; i < 10; i++)
      {
      	printf("made it to iteration: %d\n", i);
-     	worst_fit_alloc(20);
      	best_fit_alloc(20);
     }
 
-    void *kB_worst = worst_fit_alloc(4);
+   
     void *kB_best = best_fit_alloc(4);
-
-    printf("Worst fit after realloc: \n");
-    printCurrentAllocs(0);
-
-    printf("Best fit before realloc: \n");
-    printCurrentAllocs(1);
 
     printf("worst kB: %lu best kB: %lu\n", kB_worst, kB_best);
 }
 
 int main(int argc, char *argv[])
 {
-     worst_fit1();
-    worst_fit2();
-    worst_fit3();
-    worst_fit4();
-    best_fit1();
-    best_fit2();
-    best_fit3();
-    best_fit4();
+    // worst_fit1();
+    // worst_fit2();
+    // worst_fit3();
+    // worst_fit4();
+    // best_fit1();
+    // best_fit2();
+    // best_fit3();
+    // best_fit4();
  
-    //best_vs_worst_large_data();
+    best_vs_worst_large_data();
 
     return 0;
 }
