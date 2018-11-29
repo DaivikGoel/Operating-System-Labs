@@ -250,7 +250,7 @@ void best_fit4()
     return;
 }
 
-void best_vs_worst_large_data()
+void large_data()
 {
     //create worst fit memory space with divider in middle
     printf("Worst fit: \n");
@@ -378,7 +378,7 @@ int main(int argc, char *argv[])
     // best_fit2();
     // best_fit3();
     // best_fit4();
-    best_vs_worst_large_data();
+    large_data();
    // compare_fragments_4();
     //compare_test_performance_small();
     return 0;
