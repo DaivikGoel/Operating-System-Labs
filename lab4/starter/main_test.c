@@ -252,17 +252,16 @@ void best_fit4()
 
 void large_data()
 {
-    //create worst fit memory space with divider in middle
+    printf("THIS TEST IS TO SEE FRAGMENTATION \n");
+    printf("-------------------\n");
     printf("Worst fit: \n");
     worst_fit_memory_init(2124);
     void *a = worst_fit_alloc(1000);
     void *f = worst_fit_alloc(4);
-    void *b = worst_fit_alloc(1000);
     printf("Worst fit before de - alloc: \n");
     printCurrentAllocs(0);
 
     worst_fit_dealloc(a);
-    worst_fit_dealloc(b);
     printf("Worst fit after de - alloc: \n");
     printCurrentAllocs(0);
 
@@ -271,12 +270,11 @@ void large_data()
     best_fit_memory_init(2124);
     void *c = best_fit_alloc(1000);
     void *e = best_fit_alloc(4);
-    void *d = best_fit_alloc(1000);
+
     printf("Best fit before de - alloc: \n");
     printCurrentAllocs(1);
 
     best_fit_dealloc(c);
-    best_fit_dealloc(d);
 
     printf("Best fit after de - alloc: \n");
     printCurrentAllocs(1);
