@@ -341,8 +341,7 @@ void printCurrentAllocs(int bestOrWorst)
 
 	while (traverse != NULL)
 	{
-		printf("Memory Address: %lu, Size: %d, State: %d, Next: %p, Previous: %p\n", (long unsigned int)traverse, traverse->size, traverse->state, traverse->next,
-			   traverse->previous);
+		printf("Memory Address: %lu, Size: %d, State: %d\n", (long unsigned int)traverse, traverse->size, traverse->state);
 		traverse = traverse->next;
 	}
 }

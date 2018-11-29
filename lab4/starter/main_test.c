@@ -267,7 +267,6 @@ void best_vs_worst_large_data()
     printCurrentAllocs(0);
 
 
-    //create best fit memory space with divider in middle
     printf("Best fit: \n");
     best_fit_memory_init(2124);
     void *c = best_fit_alloc(1000);
@@ -282,27 +281,105 @@ void best_vs_worst_large_data()
     printf("Best fit after de - alloc: \n");
     printCurrentAllocs(1);
 
-	
-    for (int i = 0; i < 10; i++)
-     {
-        printf("made it to iteration: %d \n", i);
-     	best_fit_alloc(20);
-        worst_fit_alloc(20);
+    void **memory_bf = malloc(sizeof(void *) * 20);
+    void **memory_wf = malloc(sizeof(void *) * 20);
+
+    for (int i = 0; i < 20; i++)
+    {
+        memory_bf[i] = best_fit_alloc(4);
+        memory_wf[i] = worst_fit_alloc(4);
+        
     }
+
+    for(int i=0; i< 20; i +=3){
+
+        best_fit_dealloc(memory_bf[i]);
+        best_fit_dealloc(memory_bf[i + 1]);
+        worst_fit_dealloc(memory_wf[i]);
+        worst_fit_dealloc(memory_wf[i + 1]);
+    }
+    printf("-------------------\n");
+    printf("Worst Fit after Multiple Allocs\n");
+    printCurrentAllocs(0);
+    printf("-------------------\n");
+    printf("Best Fit after Multiple Allocs\n");
+    printCurrentAllocs(1);
+    printf("-------------------\n");
+    printf("\nFragments below 4 Worst Fit %i\n", worst_fit_count_extfrag(4));
+    printf("\nFragments below 8 Worst Fit %i\n", worst_fit_count_extfrag(8));
+    printf("\nFragments below 32 Worst Fit %i\n", worst_fit_count_extfrag(32));
+    printf("\nFragments below 64 Worst Fit %i\n", worst_fit_count_extfrag(64));
+    printf("\nFragments below 128 Worst Fit %i\n", worst_fit_count_extfrag(128));
+    printf("\nFragments below 256 Worst Fit %i\n", worst_fit_count_extfrag(256));
+    printf("\nFragments below 512 Worst Fit %i\n", worst_fit_count_extfrag(512));
+    printf("\nFragments below 1024 Worst Fit %i\n", worst_fit_count_extfrag(1024));
+    printf("\nFragments below 2048 Worst Fit %i\n", worst_fit_count_extfrag(2048));
+    printf("-------------------\n");
+    printf("\nFragments below 4 Best Fit %i\n", best_fit_count_extfrag(4));
+    printf("\nFragments below 8 Best Fit %i\n", best_fit_count_extfrag(8));
+    printf("\nFragments below 32 Best Fit %i\n", best_fit_count_extfrag(32));
+    printf("\nFragments below 64 Best Fit %i\n", best_fit_count_extfrag(64));
+    printf("\nFragments below 128 Best Fit %i\n", best_fit_count_extfrag(128));
+    printf("\nFragments below 256 Best Fit %i\n", best_fit_count_extfrag(256));
+    printf("\nFragments below 512 Best Fit %i\n", best_fit_count_extfrag(512));
+    printf("\nFragments below 1024 Best Fit %i\n", best_fit_count_extfrag(1024));
+    printf("\nFragments below 2048 Best Fit %i\n", best_fit_count_extfrag(2048));
+    printf("-------------------\n");
+}
+// constantly allocates and deallocates memory in small chunks to count fragmentation
+
+void compare_fragments_4()
+{
+
+    printf("Comparing fragments of worst and best\n");
+
+    
+    worst_fit_memory_init(12000);
+    best_fit_memory_init(12000);
+
+    void **memory_bf = malloc(sizeof(void *) * 50);
+    void **memory_wf = malloc(sizeof(void *) * 50);
+
+    for (int k = 0; k < 50; k++)
+    {
+        memory_bf[k] = best_fit_alloc(104);
+        memory_wf[k] = worst_fit_alloc(104);
+    }
+
+    for (int i = 0; i < 25; i += 2)
+    {
+        best_fit_dealloc(memory_bf[i]);
+        
+    }
+    for (int i = 0; i < 50; i += 2)
+    {
+        worst_fit_dealloc(memory_wf[i]);
+    }
+    for (int k = 0; k < 50; k++)
+    {
+        memory_bf[k] = best_fit_alloc(24);
+        memory_wf[k] = worst_fit_alloc(24);
+    }
+
+    printCurrentAllocs(0);
+    printCurrentAllocs(1);
+
+    printf("Fragmentation below 8 bytes - Best Fit %i\n", best_fit_count_extfrag(8));
+    printf("Fragmentation below 8 bytes - Worst Fit %i\n", worst_fit_count_extfrag(8));
 }
 
 int main(int argc, char *argv[])
 {
-    worst_fit1();
-    worst_fit2();
-    worst_fit3();
-    worst_fit4();
-    best_fit1();
-    best_fit2();
-    best_fit3();
-    best_fit4();
- 
+    // worst_fit1();
+    // worst_fit2();
+    // worst_fit3();
+    // worst_fit4();
+    // best_fit1();
+    // best_fit2();
+    // best_fit3();
+    // best_fit4();
     best_vs_worst_large_data();
-
+   // compare_fragments_4();
+    //compare_test_performance_small();
     return 0;
 }
